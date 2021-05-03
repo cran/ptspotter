@@ -15,6 +15,8 @@
 #' @return Write a series of sequentially numbered files within a specified
 #' directory. Creates the directory if required.
 #'
+#' @importFrom stringr str_count
+#'
 #' @examples
 #'
 #' \dontshow{.old_wd <- setwd(tempdir())}
@@ -53,18 +55,14 @@ seq_file_ops <- function(n, target_dir = NULL, filetype = "R",
   }
 
   # wherever the digits are single, add a 0 in front
-  req_nos[stringr::str_count(req_nos) == 1] <- paste0(
-    "0", req_nos[stringr::str_count(req_nos) == 1]
+  req_nos[str_count(req_nos) == 1] <- paste0(
+    "0", req_nos[str_count(req_nos) == 1]
   )
-
-  # message confirmation msg
-  message(paste("Required numbers are", paste0(req_nos, collapse = ", ")))
 
   # create the filenames
   req_files <- paste0(paste(target_dir, req_nos, sep = "/"),
                       "-.",
                       filetype)
-  message(paste("Required files are", paste(req_files, collapse = ", ")))
 
   if(force == FALSE){
   # find any preexisting files

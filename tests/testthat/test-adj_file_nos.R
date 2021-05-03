@@ -163,7 +163,7 @@ test_that("files >= target are adjusted", {
 # expect message ----------------------------------------------------------
 test_that("func produces message on success",
           expect_message(
-            adj_file_nos(1, directory = "munge"), "Filenames adjusted from:"
+            adj_file_nos(1, directory = "munge"), "5 Filenames adjusted."
           )
 )
 
@@ -189,5 +189,16 @@ test_that("file contents are incremented as expected", {
   expect_identical(readLines("part_dec/06-.R"), "start of dec")
 
   })
+
+
+# errors ------------------------------------------------------------------
+
+test_that("func errors as expected", {
+  expect_error(adj_file_nos(c(1, 2), "munge"),
+               "Please use single digits for `target` only.")
+  expect_error(adj_file_nos(1),
+               "invalid 'path' argument")
+
+})
 
 with(globalenv(), {setwd(.old_wd)})

@@ -5,8 +5,8 @@
 #' additional or removed files.
 #'
 #' @param target Required. The number in the sequential scripts to begin the
-#' adjustment. The adjustment will affect script with that leading digit and
-#' greater.
+#' adjustment. Use single digits only. The adjustment will affect script with
+#' that leading digit and greater.
 #' @param directory The directory holding the sequential
 #' scripts.
 #' @param action Defaults to "up". Whether to adjust file numbers up or down.
@@ -16,6 +16,8 @@
 #'
 #' @return Renumbers filenames in the specified directory, according to the
 #' specified action. Only affects the target file and above.
+#'
+#'@importFrom stringr str_count str_extract str_remove
 #'
 #' @examples
 #' \dontshow{.old_wd <- setwd(tempdir())}
@@ -43,6 +45,11 @@
 #'
 #' @export
 adj_file_nos <- function(target, directory = NULL, action = "up", step = 1) {
+  # passing vectors to target currently dangerous. Future compatibility.
+  if(length(target) > 1) {
+    stop("Please use single digits for `target` only.")
+  }
+
   # list all files in specified directory
   files_found <- list.files(directory)
 
@@ -55,10 +62,10 @@ adj_file_nos <- function(target, directory = NULL, action = "up", step = 1) {
   }
 
   # extract numbering
-  nums_only <- as.numeric(stringr::str_extract(num_filenms, "^[0-9]."))
+  nums_only <- as.numeric(str_extract(num_filenms, "^[0-9]."))
 
   # remove all numbers from listed filenames vector
-  alpha_only <- stringr::str_remove(num_filenms, "^[0-9].")
+  alpha_only <- str_remove(num_filenms, "^[0-9].")
 
   # reassign the numbers ready for increasing / decreasing
   nums_new <- nums_only
@@ -68,22 +75,17 @@ adj_file_nos <- function(target, directory = NULL, action = "up", step = 1) {
   if (action == "up") {
     # any file numbers greater than the specified target, increase by step
     nums_new[nums_new >= target] <- nums_new[nums_new >= target] + step
-    # message the number of files incremented.
-    message(paste(length(nums_new[nums_new >= target]), "file(s) incremented"))
 
     # if action == down, decrease numbers from target and larger down by step
   } else if (action == "down") {
     # any file numbers greater than specified target, decrease by step
     nums_new[nums_new >= target] <- nums_new[nums_new >= target] - step
-    # message the number of files decreased
-    message(paste(length(nums_new[nums_new >= target]), "file(s) decreased"))
   }
 
   # wherever the digits are single, add a 0 in front
-  nums_new[stringr::str_count(nums_new) == 1] <- paste0(
-    "0", nums_new[stringr::str_count(nums_new) == 1]
+  nums_new[str_count(nums_new) == 1] <- paste0(
+    "0", nums_new[str_count(nums_new) == 1]
   )
-  message(paste("Digits assigned: ", paste(nums_new, collapse = ", ")))
 
   # paste together new digits and filenames
   adj_filenames <- paste(directory, paste0(nums_new, alpha_only),
@@ -95,11 +97,17 @@ adj_file_nos <- function(target, directory = NULL, action = "up", step = 1) {
   # write out only adjusted filenames
   file.rename(from = old_nums, to = adj_filenames)
 
+  # If action is up, need to reverse old_nums & adj_filenames for print
+  if(action == "up"){
+    old_nums <- rev(old_nums)
+    adj_filenames <- rev(adj_filenames)
+  }
+
   # message confirmation msg to console
   message(paste(
-    length(old_nums), "Filenames adjusted from: ",
-    paste(basename(old_nums), collapse = ", "),
-    "to",
+    length(old_nums), "Filenames adjusted.\n",
+    "From:", paste(basename(old_nums), collapse = ", "), "\n",
+    "To:",
     paste(basename(adj_filenames), collapse = ", ")
   ))
 }
