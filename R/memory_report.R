@@ -8,11 +8,12 @@
 #' @import this.path utils
 #' @importFrom pryr mem_used
 #'
-#' @example
+#' @examples
+#'
 #' try(memory_report())
 #'
 #' @export
-memory_report <- function() {
+memory_report <- utils::removeSource(function() {
   # perform a manual garbage collection
   gc()
   # show me the filename of current file
@@ -21,9 +22,11 @@ memory_report <- function() {
   # message the used memory at this point
   message(paste(
     "Memory size checked at", thisfile, "is",
-    if(Sys.info()["sysname"] == "Darwin"){
+    if (Sys.info()["sysname"] == "Darwin") {
       mem_used()
-      } else(memory.size()
-             ))
-  )
-  }
+    } else {
+      (memory.size()
+      )
+    }
+  ))
+})

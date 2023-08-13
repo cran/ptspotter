@@ -24,7 +24,7 @@
 #' try(wrap_up(s_time))
 #'
 #' @export
-wrap_up <- function(start_time = NULL) {
+wrap_up <- utils::removeSource(function(start_time = NULL) {
   if(!is.null(start_time)) {
     # calculate elapsed time
     elapsed <- Sys.time() - start_time
@@ -40,4 +40,4 @@ wrap_up <- function(start_time = NULL) {
   # stop execution
   stop(paste("wrap_up at", basename(this.path())))
 
-}
+})
